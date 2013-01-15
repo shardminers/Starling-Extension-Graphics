@@ -22,7 +22,7 @@ package starling.display.graphics
 
 		public function clear():void
 		{
-			minBounds.x = minBounds.y = Number.POSITIVE_INFINITY; 
+			minBounds.x = minBounds.y = Number.POSITIVE_INFINITY;
 			maxBounds.x = maxBounds.y = Number.NEGATIVE_INFINITY;
 			strokeVertices = new Vector.<StrokeVertex>();
 			_numVertices = 0;
@@ -40,7 +40,12 @@ package starling.display.graphics
 				var prevVertex:StrokeVertex = strokeVertices[strokeVertices.length - 1];
 				var dx:Number = x - prevVertex.x;
 				var dy:Number = y - prevVertex.y;
-				var d:Number = Math.sqrt(dx*dx+dy*dy);
+				var d:Number = Math.sqrt(dx * dx + dy * dy);
+				// HACKISH: Not sure why, but adding the same point kills the next line
+				if (d == 0)
+				{
+					return;
+				}
 				u = prevVertex.u + (d / textures[0].width);
 			}
 			
@@ -62,11 +67,11 @@ package starling.display.graphics
 			isInvalid = true;
 		}
 		
-		public function get closed():Boolean 
+		public function get closed():Boolean
 		{
 			return _closed;
 		}
-		public function set closed(value:Boolean):void 
+		public function set closed(value:Boolean):void
 		{
 			_closed = value;
 		}
