@@ -9,9 +9,9 @@ These primitives can be manipulated directly, or created on your behalf by using
 Roadmap
 ===========================
 
-Improve performance of triangulator by using trapezoidalisation to pre-process polygons fed to the ear-clipping algorithm.
+Optimisations across the board to aid with the currently poor performance on mobile devices. If you're targeting mobile, try to avoid calls to graphics.lineTo() as much as possible. Any arbitrary polygon shape is processed by a triangulator implemented in AS3, which is very CPU intensive. drawRect(), drawRoundedRect(), drawCircle() etc are implemented by specialised primitives, so avoid the triangulator altogether. 
 
-Provide an extensive, and easily extendable library of low-level primitives (Planes, NGons, Arcs etc). These will be many times more performant to use than drawing them manually via mutliple moveTo()/lineTo() calls (which end up being processed by the triangulator)
+Improve performance of triangulator by using trapezoidalisation to pre-process polygons fed to the ear-clipping algorithm.
 
 Provide an extended library of off-the-shelf vertex/fragment shaders for commonly desired effects (reccomendations/votes welcome).
 

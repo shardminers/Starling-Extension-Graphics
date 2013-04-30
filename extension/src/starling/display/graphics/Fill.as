@@ -2,13 +2,6 @@ package starling.display.graphics
 {
 	import flash.geom.Matrix;
 	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	import flash.utils.getTimer;
-	
-	import starling.core.RenderSupport;
-	import starling.core.Starling;
-	import starling.display.DisplayObject;
-	import starling.textures.Texture;
 	
 	public class Fill extends Graphic
 	{
@@ -34,8 +27,12 @@ package starling.display.graphics
 		{
 			indices = new Vector.<uint>();
 			vertices = new Vector.<Number>();
-			minBounds.x = minBounds.y = Number.POSITIVE_INFINITY; 
-			maxBounds.x = maxBounds.y = Number.NEGATIVE_INFINITY;
+			if(minBounds)
+			{
+				minBounds.x = minBounds.y = 0; 
+				maxBounds.x = maxBounds.y = 0;
+			}
+			
 			_numVertices = 0;
 			VertexList.dispose(fillVertices);
 			fillVertices = null;
@@ -44,8 +41,9 @@ package starling.display.graphics
 		
 		override public function dispose():void
 		{
-			super.dispose();
 			clear();
+			fillVertices = null;
+			super.dispose();
 		}
 		
 		public function addVertex( x:Number, y:Number, color:uint = 0xFFFFFF, alpha:Number = 1 ):void
@@ -70,10 +68,23 @@ package starling.display.graphics
 			node.index = _numVertices;
 			node.vertex = vertex;
 			
-			minBounds.x = x < minBounds.x ? x : minBounds.x;
-			minBounds.y = y < minBounds.y ? y : minBounds.y;
-			maxBounds.x = x > maxBounds.x ? x : maxBounds.x;
-			maxBounds.y = y > maxBounds.y ? y : maxBounds.y;
+			if(x < minBounds.x) 
+			{
+				minBounds.x = x;
+			}
+			else if(x > maxBounds.x)
+			{
+				maxBounds.x = x;
+			}
+
+			if(y < minBounds.y)
+			{
+				minBounds.y = y;
+			}
+			else if(y > maxBounds.y)
+			{
+				maxBounds.y = y;
+			}
 			
 			_numVertices++;
 			

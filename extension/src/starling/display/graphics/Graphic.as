@@ -15,9 +15,9 @@ package starling.display.graphics
 	import starling.display.materials.StandardMaterial;
 	import starling.display.shaders.fragment.VertexColorFragmentShader;
 	import starling.display.shaders.vertex.StandardVertexShader;
-	import starling.errors.AbstractClassError;
 	import starling.errors.AbstractMethodError;
 	import starling.errors.MissingContextError;
+	import starling.events.Event;
 	
 	/**
 	 * Abstract, do not instantiate directly
@@ -57,10 +57,20 @@ package starling.display.graphics
 			_material = new StandardMaterial( defaultVertexShader, defaultFragmentShader );
 			minBounds = new Point();
 			maxBounds = new Point();
+			
+			Starling.current.addEventListener(Event.CONTEXT3D_CREATE, onContextCreated);
+		}
+		
+		private function onContextCreated( event:Event ):void
+		{
+			isInvalid = true;
+			uvsInvalid = true;
+			_material.restoreOnLostContext();
 		}
 		
 		override public function dispose():void
 		{
+			Starling.current.removeEventListener(Event.CONTEXT3D_CREATE, onContextCreated);
 			super.dispose();
 			
 			if ( vertexBuffer )
@@ -80,6 +90,12 @@ package starling.display.graphics
 				material.dispose();
 				material = null;
 			}
+			
+			vertices = null;
+			indices = null;
+			_uvMatrix = null;
+			minBounds = null;
+			maxBounds = null;
 		}
 		
 		public function set material( value:IMaterial ):void
@@ -123,13 +139,20 @@ package starling.display.graphics
 			}
 			
 			getTransformationMatrix(targetSpace, sHelperMatrix);
+			var m:Matrix = sHelperMatrix;
+			
+			var tr:Point = new Point( minBounds.x + (maxBounds.x-minBounds.x), minBounds.y )
+			var bl:Point = new Point( minBounds.x, minBounds.y + (maxBounds.y-minBounds.y) )
 			
 			var TL:Point = sHelperMatrix.transformPoint(minBounds.clone());
+			tr = sHelperMatrix.transformPoint(tr);
 			var BR:Point = sHelperMatrix.transformPoint(maxBounds.clone());
-			resultRect.x = TL.x;
-			resultRect.y = TL.y;
-			resultRect.right = BR.x;
-			resultRect.bottom = BR.y;
+			bl = sHelperMatrix.transformPoint(bl);
+				
+			resultRect.x = Math.min(TL.x, BR.x, tr.x, bl.x);
+			resultRect.y = Math.min(TL.y, BR.y, tr.y, bl.y);
+			resultRect.right = Math.max(TL.x, BR.x, tr.x, bl.x);
+			resultRect.bottom = Math.max(TL.y, BR.y, tr.y, bl.y);
 			
 			return resultRect;
 		}
@@ -155,7 +178,7 @@ package starling.display.graphics
 			}
 		}
 		
-		protected function validateNow():void
+		public function validateNow():void
 		{
 			if ( vertexBuffer && (isInvalid || uvsInvalid) )
 			{
